@@ -4,7 +4,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 --use ieee.std_logic_unsigned.all;
 
-entity header_checksum is
+entity AES is
 	port
 	(
 		--inputs
@@ -12,6 +12,8 @@ entity header_checksum is
 		reset : in std_logic; -- reset
 		start_of_data : in std_logic; -- start of ip packet on data_in, i.e. first byte of header
 		data_in : in std_logic_vector(7 downto 0); -- actual IP	packet data
+		key_length : in integer;
+		key_in : in std_logic_vector(255 downto 0);
 		
 		--outputs
 		cksum_calc : out std_logic; -- raised 1. Cycle when checksum calculation result is available on cksum_ok
@@ -19,9 +21,9 @@ entity header_checksum is
 		cksum_ok_cnt : out std_logic_vector(15 downto 0); -- count number of passed checksums
 		cksum_ko_cnt : out std_logic_vector(15 downto 0) -- count number of failed checksums
 	);
-end entity header_checksum;
+end entity AES;
 
-architecture header_checksum_arch of header_checksum is
+architecture AES_arch of AES is
 
 	signal sig_vd_clk : std_logic := '0';
 	signal sig_vd_start : std_logic := '0';
