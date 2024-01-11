@@ -10,7 +10,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity Sub_bytes is
      Port(input_byte: in STD_LOGIC_Vector(127 downto 0);
         output_byte : out STD_LOGIC_Vector(127 downto 0);
-		clk : in std_logic);
+		clk : in std_logic
+		input_length : in integer);
 end entity Sub_bytes;
 
 architecture Behavioral of Sub_bytes is
@@ -20,7 +21,7 @@ begin
 process(clk)
 	begin
 	if rising_edge(clk) then
-	for i in 0 to 15 loop
+	for i in 0 to input_length loop
 
 		
 			   if input_byte(i*8+7 downto i*8) = x"00" then output_byte(i*8+7 downto i*8) <= x"63";

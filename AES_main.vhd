@@ -13,50 +13,39 @@ entity AES is
 		start_of_data : in std_logic; -- start of ip packet on data_in, i.e. first byte of header
 		data_in : in std_logic_vector(7 downto 0); -- actual IP	packet data
 		key_length : in integer;
-		key_in : in std_logic_vector(255 downto 0);
+		key_in : in std_logic_vector	-- (255 downto 0);
 		
 		--outputs
-		cksum_calc : out std_logic; -- raised 1. Cycle when checksum calculation result is available on cksum_ok
-		cksum_ok : out std_logic; -- Shows if checksum is valid. Only used when cksum_calc = '1'
-		cksum_ok_cnt : out std_logic_vector(15 downto 0); -- count number of passed checksums
-		cksum_ko_cnt : out std_logic_vector(15 downto 0) -- count number of failed checksums
+		text_out : out std_logic_vector(1 downto 0); -- TODO: Define max size of output message
 	);
 end entity AES;
 
 architecture AES_arch of AES is
 
-	signal sig_vd_clk : std_logic := '0';
-	signal sig_vd_start : std_logic := '0';
-	signal sig_vd_data_in : std_logic_vector(7 downto 0) := "00000000";
-
-	signal sig_vd_check_done : std_logic;
-	signal sig_vd_result : std_logic;
-
-	signal sig_ok_cnt : std_logic_vector(15 downto 0) := "0000000000000000";
-	signal sig_ko_cnt : std_logic_vector(15 downto 0) := "0000000000000000";
-
-	component validator is
+	component cryptography_round is
 		port
 		(
 			clk : in std_logic;
-			vd_start : in std_logic;
-			vd_data_in : in std_logic_vector(7 downto 0);
-		
-			vd_check_done : out std_logic;
-			vd_result : out std_logic
+		);
+	end component;
+	
+	component key_schedule is
+		port
+		(
+			clk : in std_logic;
 		);
 	end component;
 
 	begin
 
-		validator_instance : validator port map
+		cryptography_round_instance : cryptography_round port map
 		(
 			clk => sig_vd_clk,
-			vd_start => sig_vd_start,
-			vd_data_in => sig_vd_data_in,
+		);
 		
-			vd_check_done => sig_vd_check_done,
-			vd_result => sig_vd_result
+		key_schedule_instance : key_schedule port map
+		(
+			clk => sig_vd_clk,
 		);
 
 	process(clk)
