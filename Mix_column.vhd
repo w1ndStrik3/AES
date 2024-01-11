@@ -8,6 +8,7 @@ entity Mix_column is
      Port(input_byte: in STD_LOGIC_Vector(31 downto 0);
         output_byte : out STD_LOGIC_Vector(31 downto 0);
 		clk : in std_logic);
+		
 end entity Mix_column;
 
 architecture Behavioral of Mix_column is
@@ -31,7 +32,7 @@ signal C41 : std_logic_vector (7 downto 0);
 signal C42 : std_logic_vector (7 downto 0);
 signal C43 : std_logic_vector (7 downto 0);
 signal C44 : std_logic_vector (7 downto 0);
- 
+
 
 Signal Ir_poly : std_logic_vector (7 downto 0); 
 begin
@@ -45,12 +46,12 @@ process(clk)
 	if rising_edge(clk) then
 ---------------------- We first find the first byte in the column-----------------------------------	
 		if input_byte(7) = '1' then
-		C11 <= (input_byte(6 downto 0) & '0') XOR Ir_poly; -- if overflow when *2
+		C11 <= (input_byte(6 downto 0) & '0') XOR Ir_poly; -- if  poly overflow
 		else C11 <= input_byte(6 downto 0) & '0'; -- if not overflow when *2
 		end if; -- the first byte of the of the first XOR is found 
 		
-		if input_byte(15 downto 8) > "1010101" then
-		C12 <= (input_byte(14 downto 8) & '0') XOR (input_byte(15 downto 8)) XOR Ir_poly; -- if overflow when *3
+		if input_byte(15) = '1' then
+		C12 <= (input_byte(14 downto 8) & '0') XOR (input_byte(15 downto 8)) XOR Ir_poly; -- if poly overflow when *3 
 		else C12 <= (input_byte(14 downto 8) & '0') XOR (input_byte(15 downto 8)); -- if not overflow when *3
 		end if; -- the second byte of the second first XOR is found
 
@@ -65,7 +66,7 @@ process(clk)
 		else C22 <= input_byte(14 downto 8) & '0'; -- if not overflow when *2
 		end if; 
 		
-		if input_byte(23 downto 16) > "1010101" then
+		if input_byte(23) = '1' then
 		C23 <= (input_byte(22 downto 16) & '0') XOR (input_byte(23 downto 16)) XOR Ir_poly; -- if overflow when *3
 		else C23 <= (input_byte(22 downto 16) & '0') XOR (input_byte(23 downto 16)); -- if not overflow when *3
 		end if; 
@@ -80,8 +81,8 @@ process(clk)
 		else C33 <= input_byte(22 downto 16) & '0'; -- if not overflow when *2
 		end if; 
 		
-		if input_byte(31 downto 24) > "1010101" then
-		C34 <= (input_byte(30 downto 24) & '0') XOR (input_byte(31 downto 24)) XOR Ir_poly; -- if overflow when *3
+		if input_byte(31) = '1' then
+		C34 <= (input_byte(30 downto 24) & '0') XOR (input_byte(31 downto 24)) XOR Ir_poly; -- if overflow when *3 
 		else C34 <= (input_byte(30 downto 24) & '0') XOR (input_byte(31 downto 24)); -- if not overflow when *3
 		end if; 
 
@@ -95,8 +96,8 @@ process(clk)
 		else C44 <= input_byte(30 downto 24) & '0'; -- if not overflow when *2
 		end if; 
 		
-		if input_byte(7 downto 0) > "1010101" then
-		C41 <= (input_byte(6 downto 0) & '0') XOR (input_byte(7 downto 0)) XOR Ir_poly; -- if overflow when *3
+		if input_byte(7) = '1' then
+		C41 <= (input_byte(6 downto 0) & '0') XOR (input_byte(7 downto 0)) XOR Ir_poly; -- if overflow when *3 
 		else C41 <= (input_byte(6 downto 0) & '0') XOR (input_byte(7 downto 0)); -- if not overflow when *3
 		end if; 
 
