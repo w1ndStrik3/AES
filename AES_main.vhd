@@ -13,7 +13,7 @@ entity AES is
 		start_of_data : in std_logic; -- start of ip packet on data_in, i.e. first byte of header
 		data_in : in std_logic_vector(7 downto 0); -- actual IP	packet data
 		key_length : in integer;
-		key_in : in std_logic_vector	-- (255 downto 0);
+		key_in : in std_logic_vector(127 downto 0);	-- (255 downto 0);
 		
 		--outputs
 		text_out : out std_logic_vector(1 downto 0); -- TODO: Define max size of output message
@@ -21,7 +21,22 @@ entity AES is
 end entity AES;
 
 architecture AES_arch of AES is
-
+--	Signals
+--		Global
+--			Write
+				signal round_index	: integer = 0;
+				signal clk_s		: std_logic = 'Z';
+--			Read
+				
+--		Key generation
+--			Write
+				signal start_ks 	: std_logic = '0';
+				signal key_in_s	:
+--			Read
+				signal done_ks 	: std_logic = 'Z';
+				-- signal round_key ???
+	
+	
 	component cryptography_round is
 		port
 		(
@@ -32,7 +47,13 @@ architecture AES_arch of AES is
 	component key_schedule is
 		port
 		(
+			start_ks : in std_logic; -- Start key schedule
 			clk : in std_logic;
+			key : in std_logic_vector(127 downto 0); -- Initial key
+			
+			
+			--round_key : out std_logic_vector(127 downto 0); -- 10 round keys 
+			done_ks : out std_logic; -- Finish key schedule
 		);
 	end component;
 
@@ -40,12 +61,17 @@ architecture AES_arch of AES is
 
 		cryptography_round_instance : cryptography_round port map
 		(
-			clk => sig_vd_clk,
+			clk => clk,
 		);
 		
 		key_schedule_instance : key_schedule port map
-		(
-			clk => sig_vd_clk,
+		(			
+			start_ks 
+			clk => clk_s_glob,
+			key 		
+			round_key	
+			-- round_key
+			done_ks 	
 		);
 
 	process(clk)
@@ -53,50 +79,9 @@ architecture AES_arch of AES is
 
 		if rising_edge(clk) then
 	
-			if reset = '1' then
-		
-				sig_vd_clk <= '0';
-				sig_vd_start <= '0';
-				sig_vd_data_in <= "00000000";
-			
-				sig_vd_check_done <= 'L';
-				sig_vd_result <= 'L';
-			
-				sig_ok_cnt <= "0000000000000000";
-				sig_ko_cnt <= "0000000000000000";
-		
-			else
-				sig_vd_clk <= clk;
-				sig_vd_start <= start_of_data;
-				sig_vd_data_in <= data_in;
-			
-				if sig_vd_check_done = '1' then
-			
-					if sig_vd_result = '1' then
-				
-						sig_ok_cnt <= std_logic_vector(unsigned(sig_ok_cnt) + 1);
-				
-					else
-						sig_ko_cnt <= std_logic_vector(unsigned(sig_ko_cnt) + 1);
-				
-					end if;
-				end if;
-			end if;
-		end if;
-		
-		if falling_edge(clk) then
-		
-			sig_vd_clk <= clk;
-			sig_vd_start <= '0';
-			
 		end if;
 
 	end process;
 
-	cksum_ok_cnt <= sig_ok_cnt;
-	cksum_ko_cnt <= sig_ko_cnt;
-	cksum_calc <= sig_vd_check_done;
-	cksum_ok <= sig_vd_result;
-
-end header_checksum_arch;
+end AES_arch;
 

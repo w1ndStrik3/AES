@@ -7,12 +7,12 @@ use ieee.numeric_std.all;
 
 entity key_schedule is
     port (
-		start_ks : in std_logic; -- Start key schedule
-		clk : in std_logic;
-		key : in std_logic_vector(127 downto 0); -- Initial key
-		round_key : out std_logic_vector(127 downto 0);
-        -- round_key : out std_logic_vector((128*(rounds+1))-1 downto 0); -- 10 round keys
-		done_ks : out std_logic; -- Finish key schedule
+		start_ks 	: in std_logic; -- Start key schedule
+		clk 		: in std_logic;
+		key 		: in std_logic_vector(127 downto 0); -- Initial key
+		round_key	: out std_logic_vector(127 downto 0);
+        -- round_key	: out std_logic_vector((128*(rounds+1))-1 downto 0); -- 10 round keys
+		done_ks 	: out std_logic; -- Finish key schedule
     );
 end key_schedule;
 
