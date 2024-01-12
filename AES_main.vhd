@@ -8,15 +8,17 @@ entity AES is
 	port
 	(
 		--inputs
-		clk : in std_logic; -- clock signal
-		reset : in std_logic; -- reset
-		start_of_data : in std_logic; -- start of ip packet on data_in, i.e. first byte of header
-		data_in : in std_logic_vector(7 downto 0); -- actual IP	packet data
-		key_length : in integer;
-		key_in : in std_logic_vector(127 downto 0);	-- (255 downto 0);
+		clk 			: in std_logic; -- clock signal
+		reset 			: in std_logic; -- reset
+		start_of_data 	: in std_logic; -- start of message text on data_in, i.e. first byte of the message
+		start_of_key	: in std_logic; -- start of message text on data_in, i.e. first byte of the message
+		data_in 		: in std_logic_vector(1024 downto 0); -- Message to be en-/decrypted
+		key_length 		: in integer;
+		enc_or_dec 		: in std_logic;
+		key_in 			: in std_logic_vector(127 downto 0);	-- (255 downto 0);
 		
 		--outputs
-		text_out : out std_logic_vector(1 downto 0); -- TODO: Define max size of output message
+		text_out 		: out std_logic_vector(1 downto 0); -- TODO: Define max size of output message
 	);
 end entity AES;
 
@@ -31,10 +33,10 @@ architecture AES_arch of AES is
 --		Key generation
 --			Write
 				signal start_ks 	: std_logic = '0';
-				signal key_in_s	:
+				signal key_in_s		: std_logic_vector(127 downto 0) = (others => '0');
 --			Read
-				signal done_ks 	: std_logic = 'Z';
-				-- signal round_key ???
+				signal done_ks 		: std_logic = 'Z';
+				-- signal round_key_s ???
 	
 	
 	component cryptography_round is
@@ -51,7 +53,6 @@ architecture AES_arch of AES is
 			clk : in std_logic;
 			key : in std_logic_vector(127 downto 0); -- Initial key
 			
-			
 			--round_key : out std_logic_vector(127 downto 0); -- 10 round keys 
 			done_ks : out std_logic; -- Finish key schedule
 		);
@@ -66,19 +67,19 @@ architecture AES_arch of AES is
 		
 		key_schedule_instance : key_schedule port map
 		(			
-			start_ks 
+			start_ks => start_ks,
 			clk => clk_s_glob,
-			key 		
-			round_key	
+			key => key_in_s,
+			round_key => round_key,
 			-- round_key
-			done_ks 	
+			done_ks => done_ks
 		);
 
 	process(clk)
 	begin
 
 		if rising_edge(clk) then
-	
+			if start_
 		end if;
 
 	end process;
