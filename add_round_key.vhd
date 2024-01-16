@@ -1,9 +1,4 @@
--- Each byte of state is XOR'd with a byte of round key (adds round key to state)
--- Import Sub_bytes for S-box/LUT
--- Round key is 4-word (128 bit) array
--- Round 0: Initial key
--- Round 1: 4 bytes of cipher key XOR'd 
-
+-- This program adds each byte of state is with a byte of round key.
 -- Completion time: 1 cycle
 
 library ieee;
@@ -12,9 +7,11 @@ use ieee.numeric_std.all;
 
 entity add_round_key is
     port (
-        input_byte : in std_logic_vector(127 downto 0); -- State/mixColumns result
-		prev_key : in std_logic_vector(127 downto 0); -- Previous round key
-        new_key : out std_logic_vector(127 downto 0); -- New round key
+        data_in : in std_logic_vector(127 downto 0); -- State/mixColumns result
+
+		round_key : in std_logic_vector(127 downto 0); -- Previous round key
+		data_out : out std_logic_vector(127_downto 0);
+        --new_key : out std_logic_vector(127 downto 0); -- New round key
 		clk : in std_logic
     );
 end add_round_key;
@@ -26,9 +23,10 @@ begin
 	begin
 		if rising_edge(clk) then
 		
-			for i in 0 to 15 loop
-				new_key(i*8+7 downto i*8) <= prev_key(i*8+7 downto i*8) xor input_byte(i*8+7 downto i*8);
-			end loop;
+			
+			--for i in 0 to 15 loop
+			--	new_key(i*8+7 downto i*8) <= prev_key(i*8+7 downto i*8) xor data_in(i*8+7 downto i*8);
+			--end loop;
 			--new_key <= prev_key(0*8+7 downto 0*8)   xor input_byte(0*8+7 downto 0*8);
 			--new_key <= prev_key(1*8+7 downto 1*8)   xor input_byte(1*8+7 downto 1*8);
 			--new_key <= prev_key(2*8+7 downto 2*8)   xor input_byte(2*8+7 downto 2*8); 

@@ -9,10 +9,9 @@ entity rkey_gen is
 	port ( 
 		clk : in std_logic;
 		rst_rkg : in std_logic; -- Start round key generation
-		round_index : in integer;
-		rounds : in integer; -- Specify 10, 12 or 14 in testbench
+		round_idx : in integer; -- Current round being handled
+		rounds : in integer; -- Max. rounds. Specify 10, 12 or 14 in testbench
 	    input_rkg : in std_logic_vector(127 downto 0);
-		--w_g : inout std_logic_vector(31 downto 0); -- Word after g-function
 		output_rkg : out std_logic_vector(127 downto 0);
 		done_rkg : out std_logic -- Finish round key generation
 	);
@@ -20,14 +19,15 @@ end rkey_gen;
 
 architecture behavioral of rkey_gen is
 	
-	signal step_count : integer := 0; -- Keeps track of current step
-	signal rot_word : std_logic_vector(127 downto 0);
-	signal padding : std_logic_vector(127 downto 0) := (others => '0');
+	-- Signals
+	signal step_count_s : integer := 0; -- Keeps track of current step
+	signal rot_word_s : std_logic_vector(127 downto 0);
+	signal padding_s : std_logic_vector(127 downto 0) := (others => '0');
 	signal input_length_s : integer := 3;
-	signal output_sb : std_logic_vector(127 downto 0);
+	signal output_sb_s : std_logic_vector(127 downto 0);
 	
-	type word is array(0 to 3) of std_logic_vector(31 downto 0);
-	signal w : word;
+	type word_t is array(0 to 3) of std_logic_vector(31 downto 0);
+	signal w_s : word_t;
 	
 	-- Round constants
 	type round_constants is array(1 to rounds) of std_logic_vector(7 downto 0); 
@@ -54,8 +54,6 @@ architecture behavioral of rkey_gen is
 	end component;
 
 begin
-
-	--w <= (input_rkg(127 downto 96), input_rkg(95 downto 64), input_rkg(63 downto 32), input_rkg(31 downto 0));
 	
 	sbox_instance : sub_bytes port map
 	(
@@ -66,40 +64,33 @@ begin
 	);
 	
 	process(clk) 
-	
-	variable w_g_v : std_logic_vector(31 downto 0);
-	--variable w_v : word;
-	
+	variable w_g_v : std_logic_vector(31 downto 0); -- Word after g-function
 	begin
 		if rising_edge(clk) then
 		
 			-- Reset
 			if rst_rkg = '1' then
-			
-				w <= 
+				-- 4 words for each round key
+				w_s <= 
 				(
-					input_rkg(127 downto 96), 
-					input_rkg(95 downto 64), 
-					input_rkg(63 downto 32), 
-					input_rkg(31 downto 0)
+					input_rkg(127 downto 96), -- w(4) etc.
+					input_rkg(95 downto 64), -- w(5) etc.
+					input_rkg(63 downto 32), -- w(6) etc.
+					input_rkg(31 downto 0) -- w(7) etc.
 				);
-				
 				done_rkg <= '0';
-				-- Rotate word (shift each byte in word left by one)
+				
+				-- Rotate and substitute words 
 				rot_word <= padding & input_rkg(23 downto 0) & input_rkg(31 downto 24); 
 				step_count <= 1;
 			
 			elsif step_count = 1 then
-			
 				step_count <= 2;
 				
 			elsif step_count = 2 then
-				-- Add round constant
-				--w_g_v := output_sb(31 downto 0) XOR (rcon(round_index) & x"000000");
-				--step_count <= 2;
 			
-				-- 4 words always for round keys
-				w_g_v := output_sb(31 downto 0) XOR (rcon(round_index) & x"000000");
+				-- Add round constant to each word
+				w_g_v := output_sb(31 downto 0) XOR (rcon(round_idx) & x"000000");
 				output_rkg <= 
 				(
 					(w(0) XOR w_g_v) & -- w4
@@ -107,11 +98,9 @@ begin
 					(w(2) XOR (w(1) XOR (w(0) XOR w_g_v))) & -- w6
 					(w(3) XOR (w(2) XOR (w(1) XOR (w(0) XOR w_g_v)))) -- w7
 				);
-				
 				done_rkg <= '1';
 				
 			else
-			
 				done_rkg <= '0';
 				
 			end if;

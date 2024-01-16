@@ -50,6 +50,7 @@ architecture AES_arch of AES is
 				signal message_s	: std_logic_vector(127 downto 0) := (others => '0');
 				signal msg_rcvd_s 	: std_logic := '0';
 --			Read
+				signal state_s		: std_logic_vector(127 downto 0) := (others => 'Z');
 	
 	component encryption_round is
 		port
@@ -109,8 +110,7 @@ architecture AES_arch of AES is
 			
 				rst_ks_s <= '1';
 				key_in_s <= key_in;
-				--kg_in_prgs <= '1';
-				
+
 				if 		(key_length = 128) 	then 	(rounds_s) <= 10;
 				elsif 	(key_length = 192) 	then 	(rounds_s) <= 12;
 				elsif 	(key_length = 256) 	then 	(rounds_s) <= 14;
