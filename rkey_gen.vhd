@@ -57,8 +57,8 @@ begin
 	
 	sbox_instance : sub_bytes port map
 	(
-		input_sb => rot_word,
-		output_sb => output_sb,
+		input_sb => rot_word_s,
+		output_sb => output_sb_s,
 		clk => clk,
 		input_length => input_length_s
 	);
@@ -81,22 +81,22 @@ begin
 				done_rkg <= '0';
 				
 				-- Rotate and substitute words 
-				rot_word <= padding & input_rkg(23 downto 0) & input_rkg(31 downto 24); 
-				step_count <= 1;
+				rot_word_s <= padding_s & input_rkg(23 downto 0) & input_rkg(31 downto 24); 
+				step_count_s <= 1;
 			
-			elsif step_count = 1 then
-				step_count <= 2;
+			elsif step_count_s = 1 then
+				step_count_s <= 2;
 				
-			elsif step_count = 2 then
+			elsif step_count_s = 2 then
 			
 				-- Add round constant to each word
-				w_g_v := output_sb(31 downto 0) XOR (rcon(round_idx) & x"000000");
+				w_g_v := output_sb_s(31 downto 0) XOR (rcon(round_idx) & x"000000");
 				output_rkg <= 
 				(
-					(w(0) XOR w_g_v) & -- w4
-					(w(1) XOR (w(0) XOR w_g_v)) & -- w5
-					(w(2) XOR (w(1) XOR (w(0) XOR w_g_v))) & -- w6
-					(w(3) XOR (w(2) XOR (w(1) XOR (w(0) XOR w_g_v)))) -- w7
+					(w_s(0) XOR w_g_v) & -- w4
+					(w_s(1) XOR (w_s(0) XOR w_g_v)) & -- w5
+					(w_s(2) XOR (w_s(1) XOR (w_s(0) XOR w_g_v))) & -- w6
+					(w_s(3) XOR (w_s(2) XOR (w_s(1) XOR (w_s(0) XOR w_g_v)))) -- w7
 				);
 				done_rkg <= '1';
 				
