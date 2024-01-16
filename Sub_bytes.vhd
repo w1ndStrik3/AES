@@ -1,28 +1,28 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --use IEEE.NUMERIC_STD.ALL;
 
+entity sub_bytes is
+    port
+	(
+		input_byte: in std_logic_vector(127 downto 0);
+        output_byte : out std_logic_vector(127 downto 0);
+		clk : in std_logic;
+		input_length : in integer
+	);
+end entity sub_bytes;
 
-
-entity Sub_bytes is
-     Port(input_byte: in STD_LOGIC_Vector(127 downto 0);
-        output_byte : out STD_LOGIC_Vector(127 downto 0);
-		clk : in std_logic
-		input_length : in integer);
-end entity Sub_bytes;
-
-architecture Behavioral of Sub_bytes is
-
+architecture sub_bytes_arch of sub_bytes is
 
 begin
 process(clk)
 	begin
 	if rising_edge(clk) then
-	for i in 0 to input_length loop
-
+	
+		for i in 0 to input_length loop
 		
 			   if input_byte(i*8+7 downto i*8) = x"00" then output_byte(i*8+7 downto i*8) <= x"63";
 			elsif input_byte(i*8+7 downto i*8) = x"01" then output_byte(i*8+7 downto i*8) <= x"7c";
@@ -283,9 +283,9 @@ process(clk)
 			else  null; -- Handling the 'others' case
 			end if;
 
-	end loop;
+		end loop;
 
 	end if;
 end process;
-end Behavioral;
+end sub_bytes_arch;
 

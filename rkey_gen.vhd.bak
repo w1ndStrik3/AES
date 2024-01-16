@@ -12,7 +12,7 @@ entity rkey_gen is
 		round_index : in integer;
 		rounds : in integer; -- Specify 10, 12 or 14 in testbench
 	    input_rkg : in std_logic_vector(127 downto 0);
-		--w_g : inout std_logic_vector(31 downto 0); -- Word after g-function
+		w_g : inout std_logic_vector(31 downto 0); -- Word after g-function
 		output_rkg : out std_logic_vector(127 downto 0);
 		done_rkg : out std_logic -- Finish round key generation
 	);
@@ -55,7 +55,7 @@ architecture behavioral of rkey_gen is
 
 begin
 
-	--w <= (input_rkg(127 downto 96), input_rkg(95 downto 64), input_rkg(63 downto 32), input_rkg(31 downto 0));
+	w <= (input_rkg(127 downto 96), input_rkg(95 downto 64), input_rkg(63 downto 32), input_rkg(31 downto 0));
 	
 	sbox_instance : sub_bytes port map
 	(
@@ -66,54 +66,33 @@ begin
 	);
 	
 	process(clk) 
-	
-	variable w_g_v : std_logic_vector(31 downto 0);
-	--variable w_v : word;
-	
 	begin
 		if rising_edge(clk) then
 		
 			-- Reset
 			if rst_rkg = '1' then
-			
-				w <= 
-				(
-					input_rkg(127 downto 96), 
-					input_rkg(95 downto 64), 
-					input_rkg(63 downto 32), 
-					input_rkg(31 downto 0)
-				);
-				
 				done_rkg <= '0';
 				-- Rotate word (shift each byte in word left by one)
-				rot_word <= padding & input_rkg(23 downto 0) & input_rkg(31 downto 24); 
+				rot_word <= padding & w(3)(23 downto 0) & w(3)(31 downto 24); 
 				step_count <= 1;
 			
 			elsif step_count = 1 then
-			
-				step_count <= 2;
-				
-			elsif step_count = 2 then
 				-- Add round constant
-				--w_g_v := output_sb(31 downto 0) XOR (rcon(round_index) & x"000000");
-				--step_count <= 2;
+				w_g <= output_sb(31 downto 0) XOR (rcon(round_index) & x"000000");
+				step_count <= 2;
 			
+			elsif step_count = 2 then
 				-- 4 words always for round keys
-				w_g_v := output_sb(31 downto 0) XOR (rcon(round_index) & x"000000");
-				output_rkg <= 
-				(
-					(w(0) XOR w_g_v) & -- w4
-					(w(1) XOR (w(0) XOR w_g_v)) & -- w5
-					(w(2) XOR (w(1) XOR (w(0) XOR w_g_v))) & -- w6
-					(w(3) XOR (w(2) XOR (w(1) XOR (w(0) XOR w_g_v)))) -- w7
-				);
+				w(0) <= w(0) XOR w_g; -- w4
+				w(1) <= w(1) XOR (w(0) XOR w_g); -- w5
+				w(2) <= w(2) XOR (w(1) XOR (w(0) XOR w_g)); -- w6
+				w(3) <= w(3) XOR (w(2) XOR (w(1) XOR (w(0) XOR w_g))); -- w7
 				
+				output_rkg <= w(0) & w(1) & w(2) & w(3);
 				done_rkg <= '1';
-				
-			else
 			
+			else
 				done_rkg <= '0';
-				
 			end if;
 		end if;
 	end process;

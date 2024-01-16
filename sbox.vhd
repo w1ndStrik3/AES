@@ -280,6 +280,7 @@ begin
 				else  null; -- Handling the 'others' case
 			end if;
 		end loop;
-	end process;
+	end if;
+end process;
 
 end architecture;
