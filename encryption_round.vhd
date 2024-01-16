@@ -1,4 +1,5 @@
 -- This program handles an encryption round.
+
 -- Completion time:
 
 library ieee;
@@ -36,8 +37,8 @@ architecture behavioral of encryption_round is
 	component sub_bytes is
 		port 
         ( 
-			input_byte: in std_logic_vector(127 downto 0);
-        	output_byte : out std_logic_vector(127 downto 0);
+			input_sb: in std_logic_vector(127 downto 0);
+        	output_sb : out std_logic_vector(127 downto 0);
 			clk : in std_logic;
 			input_length : in integer
 		);
@@ -56,8 +57,8 @@ architecture behavioral of encryption_round is
 	component mix_all_columns is
 		port
 		(
-			input_byte: in STD_LOGIC_Vector(127 downto 0);
-			output_byte : out STD_LOGIC_Vector(127 downto 0);
+			input_mac : in STD_LOGIC_Vector(127 downto 0);
+			output_mac : out STD_LOGIC_Vector(127 downto 0);
 			clk : in std_logic
 		);
 	end component;
@@ -66,8 +67,8 @@ architecture behavioral of encryption_round is
     
     	sub_bytes_instance : sub_bytes port map
     	(
-			input_byte	 => input_enc;
-        	output_byte	 => state_sb_s;
+			input_sb	 => input_enc;
+        	output_sb	 => state_sb_s;
 			clk			 => clk;
 			input_length => input_length_s
     	);
@@ -81,12 +82,12 @@ architecture behavioral of encryption_round is
 
         mix_all_columns_instance : mix_all_columns port map
     	(
-			input_byte	 => state_sr_s;
-        	output_byte	 => state_mc_s;
+			input_mac	 => state_sr_s;
+        	output_mac	 => state_mc_s;
 			clk			 => clk;
     	);
 
-        encrypt : process(clk)
+        process(clk)
             begin
                 if rising_edge(clk) then
                     if round_idx = 0 then
@@ -106,6 +107,7 @@ architecture behavioral of encryption_round is
 								output_enc <= rkey_enc(round_idx) xor state_sr_s;
 							end if;
 						end if;
+					end if;
                 end if;
-        end process encrypt;
+        end process;
 end architecture;

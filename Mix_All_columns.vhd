@@ -1,51 +1,59 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use IEEE.NUMERIC_STD.ALL;
+-- This program mixes the columns in a round.
 
-entity Mix_All_columns is
+-- Completion time: 2 cycles.
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+
+entity mix_all_columns is
     Port
 	(
 		clk : in std_logic;
-		input_byte: in STD_LOGIC_Vector(127 downto 0);
-		output_byte : out STD_LOGIC_Vector(127 downto 0)
+		input_mac: in std_logic_vector(127 downto 0);
+		output_mac : out std_logic_vector(127 downto 0)
     );
 		
-end entity Mix_All_columns;
+end entity mix_all_columns;
 
-architecture Behavioral of Mix_All_columns is
+architecture behavioral of mix_all_columns is
 
 
-	component Mix_column is
-	     Port(input_byte: in STD_LOGIC_Vector(31 downto 0);
-	        output_byte : out STD_LOGIC_Vector(31 downto 0);
-			clk : in std_logic);
+	component mix_column is
+	    port (
+			input_mac : in std_logic_vector(31 downto 0);
+	        output_mac : out std_logic_vector(31 downto 0);
+			clk : in std_logic
+			);
 	end component;
 
 	begin
 
-		First_column_mix : Mix_column
-				port map(
-							input_byte => input_byte(31 downto 0),
-							output_byte => output_byte(31 downto 0),
-							clk => clk);	
+		first_column_mix : mix_column
+				port map (
+							input_mac => input_mac(31 downto 0),
+							output_mac => output_mac(31 downto 0),
+							clk => clk
+						 );	
 		
-		Second_column_mix : Mix_column
-				port map(
-							input_byte => input_byte(63 downto 32),
-							output_byte => output_byte(63 downto 32),
-							clk => clk);	
+		second_column_mix : mix_column
+				port map (
+							input_mac => input_mac(63 downto 32),
+							output_mac => output_mac(63 downto 32),
+							clk => clk
+						 );	
 
-		Third_column_mix : Mix_column
+		third_column_mix : mix_column
 				port map(
-							input_byte => input_byte(95 downto 64),
-							output_byte => output_byte(95 downto 64),
+							input_mac => input_mac(95 downto 64),
+							output_mac => output_mac(95 downto 64),
 							clk => clk);	
-		Last_column_mix : Mix_column
+		last_column_mix : mix_column
 				port map(
-							input_byte => input_byte(127 downto 96),
-							output_byte => output_byte(127 downto 96),
+							input_mac => input_mac(127 downto 96),
+							output_mac => output_mac(127 downto 96),
 						        clk => clk);
 
-end Behavioral;
+end behavioral;
