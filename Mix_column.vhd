@@ -27,7 +27,7 @@ architecture behavioral of mix_column is
 	signal C21 : std_logic_vector(7 downto 0);
 	signal C22 : std_logic_vector(7 downto 0);
 	signal C23 : std_logic_vector(7 downto 0);
-	signal C24 : std_logic_vector(7 downto 0) := 
+	signal C24 : std_logic_vector(7 downto 0);
 
 	signal C31 : std_logic_vector(7 downto 0);
 	signal C32 : std_logic_vector(7 downto 0);

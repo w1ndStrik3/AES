@@ -24,9 +24,13 @@ architecture behavioral of encryption_round is
 
 	signal step_count_s : integer := 0;
 	signal input_length_s : integer := 15;
+
 	signal state_sb_s : std_logic_vector(127 downto 0) := (others => 'Z');
 	signal state_sr_s : std_logic_vector(127 downto 0) := (others => 'Z');
 	signal state_mc_s : std_logic_vector(127 downto 0) := (others => 'Z');
+
+	signal round_idx_tmp_s : integer := 99;
+	signal step_count_s : integer;
 	
 	-- Substitute bytes
 	component sub_bytes is
@@ -49,6 +53,15 @@ architecture behavioral of encryption_round is
 		);
 	end component;
 
+	component mix_all_columns is
+		port
+		(
+			input_byte: in STD_LOGIC_Vector(127 downto 0);
+			output_byte : out STD_LOGIC_Vector(127 downto 0);
+			clk : in std_logic
+		);
+	end component;
+
     begin
     
     	sub_bytes_instance : sub_bytes port map
@@ -68,7 +81,9 @@ architecture behavioral of encryption_round is
 
         mix_all_columns_instance : mix_all_columns port map
     	(
-			
+			input_byte	 => state_sr_s;
+        	output_byte	 => state_mc_s;
+			clk			 => clk;
     	);
 
         encrypt : process(clk)
@@ -76,11 +91,21 @@ architecture behavioral of encryption_round is
                 if rising_edge(clk) then
                     if round_idx = 0 then
                         output_enc <= rkey_enc(round_idx) xor input_rnc;
-                    elsif (round_idx /= 0) and (round_idx /= rounds) then
-                        
-                    elsif round_idx = rounds then
-                        
-                    end if;
+                    elsif round_idx /= 0 then
+                        if round_idx_tmp_s /= round_idx then
+							round_idx_tmp_s <= round_idx;
+							step_count_s <= 1;
+						else
+							step_count_s <= step_count_s + 1;
+						end if;
+
+						if step_count_s = 4 then
+							if round_idx /= rounds then
+								output_enc <= rkey_enc(round_idx) xor state_mc_s;
+							else
+								output_enc <= rkey_enc(round_idx) xor state_sr_s;
+							end if;
+						end if;
                 end if;
         end process encrypt;
 end architecture;
