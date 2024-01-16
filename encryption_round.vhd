@@ -23,6 +23,10 @@ end encryption_round;
 architecture behavioral of encryption_round is
 
 	signal step_count_s : integer := 0;
+
+	signal state_sb_s : std_logic_vector(127 downto 0) := (others => 'Z');
+	signal state_sr_s : std_logic_vector(127 downto 0) := (others => 'Z');
+	signal state_mc_s : std_logic_vector(127 downto 0) := (others => 'Z');
 	
 	-- Substitute bytes
 	component sub_bytes is
