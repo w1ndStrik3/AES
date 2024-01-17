@@ -13,7 +13,7 @@ entity AES is
 		read_msg 		: in std_logic; -- start of message text on msg_in, i.e. the whole message
 		read_key		: in std_logic; -- start of key on key_in, i.e. the whole key
 		msg_in 			: in std_logic_vector(127 downto 0); -- Message to be en-/decrypted
-		key_length 		: in integer;
+		-- key_length 		: in integer;
 		--enc_or_dec 		: in std_logic;
 		key_in 			: in std_logic_vector(127 downto 0); -- (255 downto 0);
 		--round_key_m		:
@@ -30,6 +30,7 @@ architecture AES_arch of AES is
 				signal round_idx_s	: integer := 0;
 				signal rounds_s		: integer := 0;
 --			Read
+				signal ciphertext 	: std_logic_vector(127 downto 0) := (others => 'Z');
 				--signal clk_s		: std_logic := 'Z';
 
 --		Internal
@@ -56,6 +57,13 @@ architecture AES_arch of AES is
 		port
 		(
 			clk : in std_logic;
+			rst_enc : in std_logic; -- Start encryption round
+			round_idx : in integer;
+        	rkey_enc : in round_key_t;
+			input_enc : in std_logic_vector(127 downto 0); -- state
+			output_enc : out std_logic_vector(127 downto 0);
+			rnd_cmpl_enc : out std_logic; -- Encryption round completed
+			fin_enc : out std_logic -- Entire encryption completed, i.e. the ciphertext is ready
 		);
 	end component;
 	
@@ -71,7 +79,6 @@ architecture AES_arch of AES is
 		(
 			clk : in std_logic;
 			rst_ks : in std_logic; -- Start key schedule
-			rounds : in integer; -- Max. rounds. Specify 10, 12 or 14 in testbench
 			round_idx : in integer;			
 			key : in std_logic_vector(127 downto 0); -- Cipher key. Adjust size if 192/256
 			rkey : out round_key_t;
@@ -95,7 +102,6 @@ architecture AES_arch of AES is
 		(
 			clk => clk,
 			rst_ks => rst_ks_s,
-			rounds => rounds_s,
 			key => key_in_s,
 			round_key => round_key_s,
 			done_ks => done_ks_s
@@ -111,10 +117,6 @@ architecture AES_arch of AES is
 				rst_ks_s <= '1';
 				key_in_s <= key_in;
 
-				if 		(key_length = 128) 	then 	(rounds_s) <= 10;
-				elsif 	(key_length = 192) 	then 	(rounds_s) <= 12;
-				elsif 	(key_length = 256) 	then 	(rounds_s) <= 14;
-				end if;
 				
 			end if;
 			
@@ -131,6 +133,10 @@ architecture AES_arch of AES is
 				
 			end if;
 			
+			if done_enc = '1';
+
+			end if;
+
 			if done_ks_s = '1' then
 				--if 
 			end if;

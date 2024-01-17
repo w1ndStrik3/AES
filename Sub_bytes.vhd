@@ -1,4 +1,6 @@
+-- This program substitutes each byte with the Rijndael S-box.
 
+-- Completion time: 1 cycle.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -8,19 +10,18 @@ entity sub_bytes is
 	(
 		input_sb: in std_logic_vector(127 downto 0);
         output_sb : out std_logic_vector(127 downto 0);
-		clk : in std_logic;
-		input_length : in integer
+		clk : in std_logic
 	);
 end entity sub_bytes;
 
-architecture sub_bytes_arch of sub_bytes is
+architecture behavioral of sub_bytes is
 
 begin
 process(clk)
 	begin
 	if rising_edge(clk) then
 	
-		for i in 0 to input_length loop
+		for i in 0 to 15 loop
 		
 			   if input_sb(i*8+7 downto i*8) = x"00" then output_sb(i*8+7 downto i*8) <= x"63";
 			elsif input_sb(i*8+7 downto i*8) = x"01" then output_sb(i*8+7 downto i*8) <= x"7c";
@@ -285,5 +286,5 @@ process(clk)
 
 	end if;
 end process;
-end sub_bytes_arch;
+end behavioral;
 

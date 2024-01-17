@@ -11,13 +11,12 @@ entity decryption_round is
     port
     (
 		clk : in std_logic;
-		rst_enc : in std_logic; -- Start encryption round
-		rounds : in integer; -- Max. rounds. Specify 10, 12 or 14 in testbench
+		rst_dec : in std_logic; -- Start decryption round
 		round_idx : in integer;
-        rkey_enc : in round_key_t;
-		input_enc : in std_logic_vector(127 downto 0); -- state
-		output_enc : out std_logic_vector(127 downto 0);
-		done_enc : out std_logic -- Finish encryption round
+        rkey_dec : in round_key_t;
+		input_dec : in std_logic_vector(127 downto 0); -- state
+		output_dec : out std_logic_vector(127 downto 0);
+		done_dec : out std_logic -- Finish encryption round
     );
 end decryption_round;
 
@@ -37,7 +36,7 @@ architecture behavioral of decryption_round is
 	component sub_bytes is
 		port 
         ( 
-			input_sb : in std_logic_vector(127 downto 0);
+			input_sb: in std_logic_vector(127 downto 0);
         	output_sb : out std_logic_vector(127 downto 0);
 			clk : in std_logic;
 			input_length : in integer
@@ -57,7 +56,7 @@ architecture behavioral of decryption_round is
 	component mix_all_columns is
 		port
 		(
-			input_mac: in STD_LOGIC_Vector(127 downto 0);
+			input_mac : in STD_LOGIC_Vector(127 downto 0);
 			output_mac : out STD_LOGIC_Vector(127 downto 0);
 			clk : in std_logic
 		);
@@ -83,31 +82,49 @@ architecture behavioral of decryption_round is
         mix_all_columns_instance : mix_all_columns port map
     	(
 			input_mac	 => state_sr_s;
-        	output_mac   => state_mc_s;
+        	output_mac	 => state_mc_s;
 			clk			 => clk;
     	);
 
         process(clk)
             begin
                 if rising_edge(clk) then
+
                     if round_idx = 0 then
+
                         output_enc <= rkey_enc(round_idx) xor input_rnc;
+
                     elsif round_idx /= 0 then
+
                         if round_idx_tmp_s /= round_idx then
+
 							round_idx_tmp_s <= round_idx;
 							step_count_s <= 1;
+
 						else
+
 							step_count_s <= step_count_s + 1;
+
 						end if;
 
 						if step_count_s = 4 then
+
 							if round_idx /= rounds then
+
 								output_enc <= rkey_enc(round_idx) xor state_mc_s;
+
 							else
+
 								output_enc <= rkey_enc(round_idx) xor state_sr_s;
+
 							end if;
+
 						end if;
+
 					end if;
+
                 end if;
+
         end process;
+		
 end architecture;

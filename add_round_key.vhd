@@ -1,4 +1,5 @@
 -- This program adds each byte of state is with a byte of round key.
+
 -- Completion time: 1 cycle
 
 library ieee;
@@ -7,11 +8,9 @@ use ieee.numeric_std.all;
 
 entity add_round_key is
     port (
-        data_in : in std_logic_vector(127 downto 0); -- State/mixColumns result
-
+        data_in : in std_logic_vector(127 downto 0); -- State (encryption round result)
 		round_key : in std_logic_vector(127 downto 0); -- Previous round key
 		data_out : out std_logic_vector(127_downto 0);
-        --new_key : out std_logic_vector(127 downto 0); -- New round key
 		clk : in std_logic
     );
 end add_round_key;

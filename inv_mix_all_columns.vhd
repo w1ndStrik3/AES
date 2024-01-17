@@ -1,26 +1,29 @@
+-- This program 
+
+-- Completion time: 
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity in_Mix_All_columns is
+entity inv_mix_all_columns is
      Port(
 	  clk : in std_logic;
 	  input_byte: in STD_LOGIC_Vector(127 downto 0);
 			 output_byte : out STD_LOGIC_Vector(127 downto 0)
           );
 		
-end entity in_Mix_All_columns;
+end entity inv_mix_all_columns;
 
-architecture Behavioral of in_Mix_All_columns is
+architecture behavioral of inv_mix_all_columns is
 
-
-component in_mix_column is
-     Port(input_byte: in STD_LOGIC_Vector(31 downto 0);
-        output_byte : out STD_LOGIC_Vector(31 downto 0);
-		clk : in std_logic);
-end component;
+	component in_mix_column is
+		Port(input_byte: in STD_LOGIC_Vector(31 downto 0);
+			output_byte : out STD_LOGIC_Vector(31 downto 0);
+			clk : in std_logic);
+	end component;
 
 begin
 
@@ -47,4 +50,4 @@ Last_column_in_mix : in_mix_column
 					output_byte => output_byte(127 downto 96),
 				        clk => clk);
 
-end Behavioral;
+end behavioral;

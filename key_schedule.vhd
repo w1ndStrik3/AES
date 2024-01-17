@@ -1,5 +1,6 @@
 -- This program assigns round keys to all rounds. Keys are handed over in main.
--- Completion time:
+
+-- Completion time: 5 cycles.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -10,9 +11,8 @@ entity key_schedule is
     port (
 		clk : in std_logic;
 		rst_ks : in std_logic; -- Start key schedule
-		rounds : in integer; -- Max. rounds. Specify 10, 12 or 14 in testbench
 		round_idx : in integer;
-		key : in std_logic_vector(127 downto 0); -- Cipher key. Adjust size if 192/256
+		key : in std_logic_vector(127 downto 0); -- Cipher key
 		rkey : out round_key_t;
 		done_ks : out std_logic -- Finish key schedule
     );
@@ -27,8 +27,7 @@ architecture behavioral of key_schedule is
 	signal input_rkg_s : std_logic_vector(127 downto 0);
 	signal output_rkg_s : std_logic_vector(127 downto 0); -- Round key generated
 	signal done_rkg_s : std_logic := 'Z'; -- Finish round key generation
-	signal current_word_s : integer := 0; -- Current word being generated
-	--signal round_index_s : integer := 0; -- Current round being handled
+	signal current_word_s : integer := 3; -- Current word being generated
 	
 	-- One word
 	type word_t is array(0 to 3) of std_logic_vector(31 downto 0);
@@ -39,31 +38,27 @@ architecture behavioral of key_schedule is
 	-- signal words_s : words_all_t; -- := (others => (others => '0')); -- Initialize all 0
 	
 	-- All round keys generated
-	signal rkey_s : round_key_t;
+	signal rkey_s : round_key_t; -- Type defined in package
 	
 	-- Round key generation
 	component rkey_gen is
 		port ( 
 			clk : in std_logic;
 			rst_rkg : in std_logic; -- Start round key generation
-			round_index : in integer;
-			rounds : in integer; -- Specify 10, 12 or 14 in testbench
-	    		input_rkg : in std_logic_vector(127 downto 0);
+			round_idx : in integer;
+	    	input_rkg : in std_logic_vector(127 downto 0);
 			output_rkg : out std_logic_vector(127 downto 0);
 			done_rkg : out std_logic -- Finish round key generation
-			);
+		);
 	end component;
 
 begin
-
-	--k <= ( key(127 downto 96), key(95 downto 64), key(63 downto 32), key(31 downto 0) );
 	
 	rkey_gen_instance : rkey_gen port map
 	(
 		clk => clk,
 		rst_rkg => rst_rkg_s,
-		round_index => round_idx,
-		rounds => rounds,
+		round_idx => round_idx,
 		input_rkg => input_rkg_s,
 		output_rkg => output_rkg_s,
 		done_rkg => done_rkg_s
@@ -86,29 +81,25 @@ begin
 								key(63 downto 32)	&
 								key(31 downto 0);
 				
-				--round_index_s <= 1;
 				step_count_s <= 1;
 				rst_rkg_s <= '1';
-				current_word_s <= 3;
 				
 			elsif done_rkg_s = '1' then
 			-- Generate subsequent keys, eg. [w(4), w(5), w(6), w(7)]
-
 				rkey_s(round_idx) <= output_rkg_s; 
 				
-				rst_rkg_s <= '1';
+				--rst_rkg_s <= '1';
 				step_count_s <= step_count_s + 1;
-				--round_index_s <= round_index_s + 1;
 				current_word_s <= current_word_s + 4;
 			
 			else
-			
+				
 				rst_rkg_s <= '0';
 				
 			end if;
 			
 			-- Finish key generation
-			if current_word_s = (4*rounds-1) then
+			if current_word_s = (4*10-1) then
 				done_ks <= '1';				
 			end if;
 		end if;

@@ -20,7 +20,6 @@ end entity mix_all_columns;
 
 architecture behavioral of mix_all_columns is
 
-
 	component mix_column is
 	    port (
 			input_mac : in std_logic_vector(31 downto 0);
@@ -46,14 +45,17 @@ architecture behavioral of mix_all_columns is
 						 );	
 
 		third_column_mix : mix_column
-				port map(
+				port map (
 							input_mac => input_mac(95 downto 64),
 							output_mac => output_mac(95 downto 64),
-							clk => clk);	
+							clk => clk
+						);	
+
 		last_column_mix : mix_column
-				port map(
+				port map (
 							input_mac => input_mac(127 downto 96),
 							output_mac => output_mac(127 downto 96),
-						        clk => clk);
+						        clk => clk
+						);
 
-end behavioral;
+end architecture;
