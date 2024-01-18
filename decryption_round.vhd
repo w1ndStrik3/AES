@@ -8,123 +8,152 @@ use ieee.numeric_std.all;
 use work.round_key_arr_pkg.all;
 
 entity decryption_round is
-    port
-    (
+	port
+	(
 		clk : in std_logic;
-		rst_dec : in std_logic; -- Start decryption round
-		round_idx : in integer;
-        rkey_dec : in round_key_t;
+		start_dec : in std_logic; -- Start decryption round when last four words have been generated
+		rkey_dec : in round_key_t;
 		input_dec : in std_logic_vector(127 downto 0); -- state
 		output_dec : out std_logic_vector(127 downto 0);
-		done_dec : out std_logic -- Finish encryption round
-    );
+		round_idx : out integer;
+		done_dec : out std_logic; -- Decryption round completed
+		fin_dec : out std_logic -- Entire decryption completed, i.e. the plaintext is ready
+	);
 end decryption_round;
 
 architecture behavioral of decryption_round is
-
-	signal step_count_s : integer := 0;
-	signal input_length_s : integer := 15;
-
-	signal state_sb_s : std_logic_vector(127 downto 0) := (others => 'Z');
-	signal state_sr_s : std_logic_vector(127 downto 0) := (others => 'Z');
-	signal state_mc_s : std_logic_vector(127 downto 0) := (others => 'Z');
-
-	signal round_idx_tmp_s : integer := 99;
-	signal step_count_s : integer;
 	
-	-- Substitute bytes
-	component sub_bytes is
-		port 
-        ( 
-			input_sb: in std_logic_vector(127 downto 0);
-        	output_sb : out std_logic_vector(127 downto 0);
-			clk : in std_logic;
-			input_length : in integer
-		);
-	end component;
-
-    -- Shift rows
-	component shift_rows is
-		port 
-        ( 
-			input_sr : in std_logic_vector(127 downto 0);
-        	output_sr : out std_logic_vector(127 downto 0);
-        	clk : in std_logic
-		);
-	end component;
-
-	component mix_all_columns is
+	signal step_count_s : intege
+	
+	signal state_io_s	: std_logic_vector(127 downto 0) := (others => '0');
+	signal state_sb_s	: std_logic_vector(127 downto 0) := (others => 'Z');
+	signal state_sr_s	: std_logic_vector(127 downto 0) := (others => 'Z');
+	signal state_mc_s	: std_logic_vector(127 downto 0) := (others => 'Z');
+	
+	signal round_idx_s	: integer := 0;
+	signal done_dec_s	: std_logic := '0';
+	signal fin_dec_s	: std_logic := '0';
+	
+	signal state_in_mc_s	 : std_logic_vector(127 downto 0) := (others => 'Z'); --input used for inverse mix column
+	-- Inverse substitute bytes
+	component inv_sub_bytes is
 		port
 		(
-			input_mac : in STD_LOGIC_Vector(127 downto 0);
-			output_mac : out STD_LOGIC_Vector(127 downto 0);
+			input_inv_sb: in std_logic_vector(127 downto 0);
+			output_inv_sb : out std_logic_vector(127 downto 0);
 			clk : in std_logic
 		);
 	end component;
+	
+	-- Inverse shift rows
+	component inv_shift_rows is
+		port
+		(
+			input_inv_sr : in std_logic_vector(127 downto 0);
+			output_inv_sr : out std_logic_vector(127 downto 0);
+			clk : in std_logic
+		);
+	end component;
+	
+	component inv_mix_all_columns is
+		port
+		(
+			input_inv_mac : in std_logic_vector(127 downto 0);
+			output_inv_mac : out std_logic_vector(127 downto 0);
+			clk : in std_logic
+		);
+	end component;
+	
+	begin
+	
+		inv_sub_bytes_instance : inv_sub_bytes port map
+		(
+			input_inv_sb	 => state_sr_s,
+			output_inv_sb	 => state_sb_s,
+			clk				 => clk
+		);
+	
+		inv_shift_rows_instance : inv_shift_rows port map
+		(
+			input_inv_sr	 => state_io_s,
+			output_inv_sr	 => state_sr_s,
+			clk				 => clk
+		);
 
-    begin
-    
-    	sub_bytes_instance : sub_bytes port map
-    	(
-			input_sb	 => input_enc;
-        	output_sb	 => state_sb_s;
-			clk			 => clk;
-			input_length => input_length_s
-    	);
+		inv_mix_all_columns_instance : inv_mix_all_columns port map
+		(
+			input_inv_mac	 => state_in_mc_s,
+			output_inv_mac	 => state_mc_s,
+			clk			 => clk
+		);
 
-        shift_rows_instance : shift_rows port map
-    	(
-			input_sr	 =>	state_sb_s;
-			output_sr	 =>	state_sr_s;
-			clk			 => clk;
-    	);
+		process(clk)
+			begin
+				if rising_edge(clk) then
+					
+					if start_dec = '1' and fin_dec_s /= '1' then
+						
+						if round_idx_s = 0 then
 
-        mix_all_columns_instance : mix_all_columns port map
-    	(
-			input_mac	 => state_sr_s;
-        	output_mac	 => state_mc_s;
-			clk			 => clk;
-    	);
-
-        process(clk)
-            begin
-                if rising_edge(clk) then
-
-                    if round_idx = 0 then
-
-                        output_enc <= rkey_enc(round_idx) xor input_rnc;
-
-                    elsif round_idx /= 0 then
-
-                        if round_idx_tmp_s /= round_idx then
-
-							round_idx_tmp_s <= round_idx;
-							step_count_s <= 1;
+							state_io_s <=rkey_dec(round_idx_s) xor input_dec;
+							
+							done_dec_s <= '1';
+							done_dec <= '1';
+							
+							round_idx_s <= 1;
+							round_idx <= 1;
 
 						else
 
-							step_count_s <= step_count_s + 1;
+							if done_dec_s = '1' then 
+								-- CC 1: inv_sub_bytes:
+								--		reads from state_io_s
+								--		writes to state_sb_s
+								step_count_s <= 1;
+								done_dec_s <= '0';
+								done_dec <= '0';
+							
+							elsif round_idx_s = 10 and step_count_s = 2 then
+								-- CC 3: internal - ON THE LAST ROUND ONLY
+								--		reads from state_sr_s
+								--		performs the add round key
+								--		writes to output_dec
+								output_dec <=rkey_dec(round_idx_s) xor state_sb_s;
+								fin_dec_s <= '1';
+								fin_dec <= '1';
 
-						end if;
+							
+							elsif step_count_s = 3 then
+								-- CC 4: internal
+								--		reads from state_ms_s
+								--		performs the add round key
+								--		writes to state_io_s
+								state_io_s <= state_mc_s;
+								state_in_mc_s <= rkey_dec(round_idx_s) xor state_sb_s;
+								round_idx_s <= round_idx_s + 1;
+								round_idx <= round_idx_s + 1;
 
-						if step_count_s = 4 then
-
-							if round_idx /= rounds then
-
-								output_enc <= rkey_enc(round_idx) xor state_mc_s;
-
+								done_dec_s <= '1';
+								done_dec <= '1';
+							
 							else
+								-- CC 2: shift_rows:
+								--		reads from state_sb_s
+								--		writes to state_sr_s
 
-								output_enc <= rkey_enc(round_idx) xor state_sr_s;
+								-- CC 3: inv_mix_all_columns:
+								--		reads from state_sr_s
+								--		writes to state_mc_s
+								step_count_s <= step_count_s + 1;
 
 							end if;
-
+							
 						end if;
-
+						
 					end if;
 
-                end if;
+				end if;
 
-        end process;
-		
+		end process;
+
 end architecture;

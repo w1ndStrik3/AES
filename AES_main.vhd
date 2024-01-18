@@ -62,8 +62,7 @@ architecture AES_arch of AES is
 		(
 			clk 		: in std_logic;
 			start_enc 	: in std_logic; -- Start encryption round
-			rounds 		: in integer; -- Max. rounds. Specify 10, 12 or 14 in testbench
-        	rkey_enc 	: in round_key_t;
+			rkey_enc 	: in round_key_t;
 			input_enc 	: in std_logic_vector(127 downto 0); -- state
 			--rnd_cmpl_enc : out std_logic; -- Encryption round completed
 			output_enc 	: out std_logic_vector(127 downto 0);
@@ -76,6 +75,13 @@ architecture AES_arch of AES is
 		port
 		(
 			clk : in std_logic;
+			start_enc 	: in std_logic; -- Start encryption round
+			rkey_enc 	: in round_key_t;
+			input_dec 	: in std_logic_vector(127 downto 0); -- state
+			--rnd_cmpl_enc : out std_logic; -- Encryption round completed
+			output_dec 	: out std_logic_vector(127 downto 0);
+			round_idx 	: out integer;
+			fin_dec 	: out std_logic -- Entire encryption completed, i.e. the ciphertext is ready
 		);
 	end component;
 	
@@ -106,7 +112,7 @@ architecture AES_arch of AES is
 			-- Outputs
 			output_enc	=>	ciph_txt_s,
 			round_idx	=>	round_idx_enc_s,
-			fin_enc	    =>  fin_enc_s
+			fin_enc		=>  fin_enc_s
 		);
 		
 		decryption_round_instance : cryptography_round port map

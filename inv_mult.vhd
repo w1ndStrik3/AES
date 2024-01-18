@@ -29,25 +29,25 @@ architecture behavioral of inv_mult is
 	signal ir_poly9 : std_logic_vector(7 downto 0);
 	signal ir_poly11 : std_logic_vector(7 downto 0);
 	signal ir_poly13 : std_logic_vector(7 downto 0);
-	signal Ir_poly14 : std_logic_vector(7 downto 0);
+	signal ir_poly14 : std_logic_vector(7 downto 0);
 
 begin
 
-	ir_poly9 <= ("0" & input(7) & input(7) & '0' & input(7) & input(7) & "00") 
-			XOR ("00" & input(6) & input(6) & '0' & input(6) & input(6) & "0")
-			XOR ("000" & input(5) & input(5) & '0' & input(5) & input(5) );
+	ir_poly9 <= ("0" & input_im(7) & input_im(7) & '0' & input_im(7) & input_im(7) & "00") 
+			XOR ("00" & input_im(6) & input_im(6) & '0' & input_im(6) & input_im(6) & "0")
+			XOR ("000" & input_im(5) & input_im(5) & '0' & input_im(5) & input_im(5) );
 
-	ir_poly11 <= ir_poly9 XOR ("000" & input(7) & input(7) & '0' & input(7) & input(7));
+	ir_poly11 <= ir_poly9 XOR ("000" & input_im(7) & input_im(7) & '0' & input_im(7) & input_im(7));
 
-	ir_poly13 <= ir_poly9 XOR ("00" & input(7) & input(7) & '0' & input(7) & input(7) & "0")
-				XOR ("000" & input(6) & input(6) & '0' & input(6) & input(6));
+	ir_poly13 <= ir_poly9 XOR ("00" & input_im(7) & input_im(7) & '0' & input_im(7) & input_im(7) & "0")
+				XOR ("000" & input_im(6) & input_im(6) & '0' & input_im(6) & input_im(6));
 					
-	Ir_poly14 <= ir_poly13 XOR ("000" & input(7) & input(7) & '0' & input(7) & input(7));
+	ir_poly14 <= ir_poly13 XOR ("000" & input_im(7) & input_im(7) & '0' & input_im(7) & input_im(7));
 
 
-	shift_3 <= input(4 downto 0) & "000";
-	shift_2 <= input(5 downto 0) & "00";
-	shift_1 <= input(6 downto 0) & "0";
+	shift_3 <= input_im(4 downto 0) & "000";
+	shift_2 <= input_im(5 downto 0) & "00";
+	shift_1 <= input_im(6 downto 0) & "0";
 
 process(clk)
 	begin
@@ -55,13 +55,13 @@ process(clk)
 
 
 
-output_9 <= shift_3 XOR input XOR ir_poly9;
+output_9 <= shift_3 XOR input_im XOR ir_poly9;
 
-output_11 <= shift_3 XOR shift_1 XOR input XOR ir_poly11;
+output_11 <= shift_3 XOR shift_1 XOR input_im XOR ir_poly11;
 
-output_13 <= shift_3 XOR shift_2 XOR input XOR ir_poly13; 
+output_13 <= shift_3 XOR shift_2 XOR input_im XOR ir_poly13; 
 
-output_14 <= shift_3 XOR shift_2 XOR shift_1 XOR Ir_poly14;
+output_14 <= shift_3 XOR shift_2 XOR shift_1 XOR ir_poly14;
 
 	end if;
 end process;

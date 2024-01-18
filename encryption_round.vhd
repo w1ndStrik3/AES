@@ -8,18 +8,18 @@ use ieee.numeric_std.all;
 use work.round_key_arr_pkg.all;
 
 entity encryption_round is
-    port
-    (
+	port
+	(
 		clk : in std_logic;
 		start_enc : in std_logic; -- Start encryption round when first four words have been generated
-        rkey_enc : in round_key_t;
+		rkey_enc : in round_key_t;
 		input_enc : in std_logic_vector(127 downto 0); -- state
 
 		output_enc : out std_logic_vector(127 downto 0);
 		round_idx : out integer;
 		done_enc : out std_logic; -- Encryption round completed
 		fin_enc : out std_logic -- Entire encryption completed, i.e. the ciphertext is ready
-    );
+	);
 end encryption_round;
 
 architecture behavioral of encryption_round is
@@ -38,20 +38,20 @@ architecture behavioral of encryption_round is
 	-- Substitute bytes
 	component sub_bytes is
 		port 
-        ( 
+		(
 			input_sb: in std_logic_vector(127 downto 0);
-        	output_sb : out std_logic_vector(127 downto 0);
+			output_sb : out std_logic_vector(127 downto 0);
 			clk : in std_logic
 		);
 	end component;
 
-    -- Shift rows
+	-- Shift rows
 	component shift_rows is
 		port 
-        ( 
+		( 
 			input_sr : in std_logic_vector(127 downto 0);
-        	output_sr : out std_logic_vector(127 downto 0);
-        	clk : in std_logic
+			output_sr : out std_logic_vector(127 downto 0);
+			clk : in std_logic
 		);
 	end component;
 
@@ -64,38 +64,38 @@ architecture behavioral of encryption_round is
 		);
 	end component;
 
-    begin
-    
-    	sub_bytes_instance : sub_bytes port map
-    	(
+	begin
+	
+		sub_bytes_instance : sub_bytes port map
+		(
 			input_sb	 => state_io_s,
-        	output_sb	 => state_sb_s,
+			output_sb	 => state_sb_s,
 			clk			 => clk
-    	);
+		);
 
-        shift_rows_instance : shift_rows port map
-    	(
+		shift_rows_instance : shift_rows port map
+		(
 			input_sr	 =>	state_sb_s,
 			output_sr	 =>	state_sr_s,
 			clk			 => clk
-    	);
+		);
 
-        mix_all_columns_instance : mix_all_columns port map
-    	(
+		mix_all_columns_instance : mix_all_columns port map
+		(
 			input_mac	 => state_sr_s,
-        	output_mac	 => state_mc_s,
+			output_mac	 => state_mc_s,
 			clk			 => clk
-    	);
+		);
 
-        process(clk)
-            begin
-                if rising_edge(clk) then
+		process(clk)
+			begin
+				if rising_edge(clk) then
 					
 					if start_enc = '1' and fin_enc_s /= '1' then
 						
-                    	if round_idx_s = 0 then
+						if round_idx_s = 0 then
 
-                    	    state_io_s <= rkey_enc(round_idx_s) xor input_enc;
+							state_io_s <= rkey_enc(round_idx_s) xor input_enc;
 							
 							done_enc_s <= '1';
 							done_enc <= '1';
@@ -105,7 +105,7 @@ architecture behavioral of encryption_round is
 
 						else
 
-                    	    if done_enc_s = '1' then 
+							if done_enc_s = '1' then 
 								-- CC 1: sub_bytes:
 								--		reads from state_io_s
 								--		writes to state_sb_s
@@ -151,8 +151,8 @@ architecture behavioral of encryption_round is
 						
 					end if;
 
-                end if;
+				end if;
 
-        end process;
+		end process;
 
 end architecture;

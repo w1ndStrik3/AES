@@ -17,7 +17,7 @@ architecture encryption_round_tb_arch of encryption_round_tb is
 		(
 			clk : in std_logic;
 			start_enc : in std_logic; -- Start encryption round when first four words have been generated
-    	    rkey_enc : in round_key_t;
+			rkey_enc : in round_key_t;
 			input_enc : in std_logic_vector(127 downto 0); -- state
 
 			round_idx : out integer;
@@ -97,7 +97,7 @@ architecture encryption_round_tb_arch of encryption_round_tb is
 			output_enc	=>	ciph_txt_s_tb,
 			round_idx	=>	round_idx_s_tb,
 			done_enc 	=>	done_enc_s_tb,
-			fin_enc	    =>  fin_enc_s_tb
+			fin_enc		=>  fin_enc_s_tb
 		);
 
 -- Stimulus process

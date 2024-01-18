@@ -8,14 +8,14 @@ use ieee.numeric_std.all;
 use work.round_key_arr_pkg.all;
 
 entity key_schedule is
-    port (
+	port (
 		clk : in std_logic;
 		rst_ks : in std_logic; -- Start key schedule
 		key : in std_logic_vector(127 downto 0); -- Cipher key
 		round_idx : out integer;
 		rkey : out round_key_t;
 		done_ks : out std_logic -- Finish key schedule
-    );
+	);
 end key_schedule;
 
 architecture behavioral of key_schedule is
@@ -43,7 +43,7 @@ architecture behavioral of key_schedule is
 			clk : in std_logic;
 			rst_rkg : in std_logic; -- Start round key generation
 			round_idx : in integer;
-	    	input_rkg : in std_logic_vector(127 downto 0);
+			input_rkg : in std_logic_vector(127 downto 0);
 			output_rkg : out std_logic_vector(127 downto 0);
 			done_rkg : out std_logic -- Finish round key generation
 		);

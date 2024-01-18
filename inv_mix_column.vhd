@@ -8,14 +8,14 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity in_Mix_column is
-     Port(input_byte: in STD_LOGIC_Vector(31 downto 0);
-        output_byte : out STD_LOGIC_Vector(31 downto 0);
+entity inv_mix_column is
+     Port(input_inv_mc: in STD_LOGIC_Vector(31 downto 0);
+        output_inv_mc : out STD_LOGIC_Vector(31 downto 0);
 		clk : in std_logic);
 		
-end entity in_Mix_column;
+end entity inv_mix_column;
 
-architecture Behavioral of in_Mix_column is
+architecture Behavioral of inv_mix_column is
 
 
 component inverse_mult is -- Declare the componet that is used by this module
@@ -56,7 +56,7 @@ begin
 
 byte0_mult : inverse_mult --first byte gets multiplied
 		port map(
-			 input => input_byte(31 downto 24),
+			 input => input_inv_mc(31 downto 24),
 			 output_9 => byte0x9(7 downto 0),
                          output_11 => byte0x11(7 downto 0),
                          output_13 => byte0x13(7 downto 0),
@@ -65,7 +65,7 @@ byte0_mult : inverse_mult --first byte gets multiplied
 
 byte1_mult : inverse_mult --second byte gets multiplied
 		port map(
-			 input => input_byte(23 downto 16),
+			 input => input_inv_mc(23 downto 16),
 			 output_9 => byte1x9(7 downto 0),
                          output_11 => byte1x11(7 downto 0),
                          output_13 => byte1x13(7 downto 0),
@@ -74,7 +74,7 @@ byte1_mult : inverse_mult --second byte gets multiplied
 
 byte2_mult : inverse_mult --third byte gets multiplied
 		port map(
-			 input => input_byte(15 downto 8),
+			 input => input_inv_mc(15 downto 8),
 			 output_9 => byte2x9(7 downto 0),
                          output_11 => byte2x11(7 downto 0),
                          output_13 => byte2x13(7 downto 0),
@@ -83,17 +83,17 @@ byte2_mult : inverse_mult --third byte gets multiplied
 
 byte3_mult : inverse_mult --fourth byte gets multiplied
 		port map(
-			 input => input_byte(7 downto 0),
+			 input => input_inv_mc(7 downto 0),
 			 output_9 => byte3x9(7 downto 0),
                          output_11 => byte3x11(7 downto 0),
                          output_13 => byte3x13(7 downto 0),
                          output_14 => byte3x14(7 downto 0),
 			 clk => clk);
 
-output_byte(31 downto 24) <= byte0X14 XOR byte1x11 xor byte2x13 xor byte3x9; -- first output byte is found using XOR gates
-output_byte(23 downto 16) <= byte0X9 XOR byte1x14 xor byte2x11 xor byte3x13;
-output_byte(15 downto 8) <= byte0X13 XOR byte1x9 xor byte2x14 xor byte3x11;
-output_byte(7 downto 0) <= byte0X11 XOR byte1x13 xor byte2x9 xor byte3x14;
+output_inv_mc(31 downto 24) <= byte0X14 XOR byte1x11 xor byte2x13 xor byte3x9; -- first output byte is found using XOR gates
+output_inv_mc(23 downto 16) <= byte0X9 XOR byte1x14 xor byte2x11 xor byte3x13;
+output_inv_mc(15 downto 8) <= byte0X13 XOR byte1x9 xor byte2x14 xor byte3x11;
+output_inv_mc(7 downto 0) <= byte0X11 XOR byte1x13 xor byte2x9 xor byte3x14;
 
 
 

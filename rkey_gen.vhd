@@ -10,7 +10,7 @@ entity rkey_gen is
 	port ( 
 		clk : in std_logic;
 		rst_rkg : in std_logic; -- Reset round key generation
-	    input_rkg : in std_logic_vector(127 downto 0);
+		input_rkg : in std_logic_vector(127 downto 0);
 		round_idx : in integer; -- Current round being handled
 		output_rkg : out std_logic_vector(127 downto 0);
 		done_rkg : out std_logic -- Finish round key generation
@@ -82,7 +82,7 @@ begin
 				-- Rotate left so [b0, b1, b2, b3] becomes [b1, b2, b3, b0]
 				-- Substitute all bytes in word. Assigns input rot_word_s to S-box
 				rot_word_s <= padding_s & 
-						      input_rkg(23 downto 16) & -- Byte 1
+							  input_rkg(23 downto 16) & -- Byte 1
 							  input_rkg(15 downto 8) & -- Byte 2
   							  input_rkg(7 downto 0) &  -- Byte 3
 							  input_rkg(31 downto 24); -- Byte 0
