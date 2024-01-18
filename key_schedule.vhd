@@ -1,4 +1,4 @@
--- This program assigns round keys to all rounds. Keys are handed over in main.
+-- This program schedules round keys for all rounds. Keys are handed over in main.
 
 -- Completion time: 5 cycles.
 
@@ -30,16 +30,12 @@ architecture behavioral of key_schedule is
 	signal current_word_s : integer := 3; -- Current word being generated
 	signal round_idx_s : integer := 1;
 	
-	-- One word
-	type word_t is array(0 to 3) of std_logic_vector(31 downto 0);
-	signal w_s : word_t;
-	
-	-- All words generated
-	-- type words_all_t is array(0 to (4*rounds+3)) of std_logic_vector(31 downto 0); 
-	-- signal words_s : words_all_t; -- := (others => (others => '0')); -- Initialize all 0
+	-- Array holds all four words for current round key being generated
+	type words_t is array(0 to 3) of std_logic_vector(31 downto 0);
+	signal w_s : words_t;
 	
 	-- All round keys generated
-	signal rkey_s : round_key_t; -- Type defined in package
+	signal rkey_s : round_key_t; -- Type defined in package round_key_arr_pkg
 	
 	-- Round key generation
 	component rkey_gen is
@@ -69,9 +65,10 @@ begin
 	generate_keys : process(clk) 
 	begin
 		if rising_edge(clk) then
+
 			-- Reset and generate first words directly from cipher key
 			if rst_ks = '1' then 
-				w_s(0) <= key(127 downto 96); -- Column 1 of initial key
+				w_s(0) <= key(127 downto 96); -- Column 1 of cipher key
 				w_s(1) <= key(95 downto 64); -- Column 2 
 				w_s(2) <= key(63 downto 32); -- Column 3 
 				w_s(3) <= key(31 downto 0); -- Column 4 
@@ -82,49 +79,36 @@ begin
 								key(63 downto 32)	&
 								key(31 downto 0);
 				
-				round_idx <= 0;
-				
-				input_rkg_s <= key(127 downto 0);
-				
-				--step_count_s <= 1;
+				input_rkg_s <= key(127 downto 0); -- Passes first round key (cipher key) to rkey_gen
 				rst_rkg_s <= '1';
 				done_ks <= '0';
-				
+				round_idx <= 0;
+			
+			-- Generate subsequent key, eg. w(4), w(5), w(6), w(7)	
 			elsif done_rkg_s = '1' then
-			-- Generate subsequent keys, eg. [w(4), w(5), w(6), w(7)]
+
 				rkey(round_idx_s) <= output_rkg_s; 
-				-- input_rkg_s <= output_rkg_s;
-				-- round_idx_s <= round_idx_s + 1;
 				round_idx <= round_idx_s;
 				
+				-- If not generating the last round key
 				if current_word_s < 39 then
-					rst_rkg_s <= '1';
-					--step_count_s <= step_count_s + 1;
-					current_word_s <= current_word_s + 4;
 					
+					rst_rkg_s <= '1';
+					current_word_s <= current_word_s + 4;
 					input_rkg_s <= output_rkg_s;
 					round_idx_s <= round_idx_s + 1;
-					
+				
+				-- If generating the last ro
 				else
-				
 					done_ks <= '1';
-					
+
 				end if;
+
 			else
-				
+
 				rst_rkg_s <= '0';
 				
 			end if;
-			
-			-- Finish key generation
-			if current_word_s = 39 then
-							
-			end if;
-			
-			--rkey <= rkey_s;
-			
 		end if;
-		
 	end process generate_keys;
-	
 end architecture;

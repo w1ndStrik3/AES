@@ -52,47 +52,27 @@ BEGIN
 -- Stimulus process
 stim_proc: process
 begin
-input_byte(7 downto 0) <= "00000001"; 
-input_byte(15 downto 8) <= "00000010";
-input_byte(23 downto 16) <= "00000100";
-input_byte(31 downto 24) <= "00001000";
+input_byte(7 downto 0) <= x"e5"; 
+input_byte(15 downto 8) <= x"98";
+input_byte(23 downto 16) <= x"27";
+input_byte(31 downto 24) <= x"1e";
 
-input_byte(39 downto 32) <= "00000001"; 
-input_byte(47 downto 40) <= "00000010";
-input_byte(55 downto 48) <= "00000100";
-input_byte(63 downto 56) <= "00001000";
+input_byte(39 downto 32) <= x"f1"; 
+input_byte(47 downto 40) <= x"11";
+input_byte(55 downto 48) <= x"41";
+input_byte(63 downto 56) <= x"b8";
 
-input_byte(71 downto 64) <= "00000001"; 
-input_byte(79 downto 72) <= "00000010";
-input_byte(87 downto 80) <= "00000100";
-input_byte(95 downto 88) <= "00001000";
+input_byte(71 downto 64) <= x"ae"; 
+input_byte(79 downto 72) <= x"52";
+input_byte(87 downto 80) <= x"b4";
+input_byte(95 downto 88) <= x"e0";
 
-input_byte(103 downto 96) <= "00000001"; 
-input_byte(111 downto 104) <= "00000010";
-input_byte(119 downto 112) <= "00000100";
-input_byte(127 downto 120) <= "00001000";
+input_byte(103 downto 96) <= x"30"; 
+input_byte(111 downto 104) <= x"5d";
+input_byte(119 downto 112) <= x"bf";
+input_byte(127 downto 120) <= x"d4";
 
 
-wait for 4 ns;
-input_byte(7 downto 0) <= "11000001"; -- with overflow
-input_byte(15 downto 8) <= "11000010";
-input_byte(23 downto 16) <= "11000100";
-input_byte(31 downto 24) <= "11001000";
-
-input_byte(39 downto 32) <= "11000001"; -- with overflow
-input_byte(47 downto 40) <= "11000010";
-input_byte(55 downto 48) <= "11000100";
-input_byte(63 downto 56) <= "11001000";
-
-input_byte(71 downto 64) <= "11000001"; -- with overflow
-input_byte(79 downto 72) <= "11000010";
-input_byte(87 downto 80) <= "11000100";
-input_byte(95 downto 88) <= "11001000";
-
-input_byte(103 downto 96) <= "11000001"; -- with overflow
-input_byte(111 downto 104) <= "11000010";
-input_byte(119 downto 112) <= "11000100";
-input_byte(127 downto 120) <= "11001000";
 
 
 

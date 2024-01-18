@@ -20,7 +20,7 @@ entity AES is
 		
 		--outputs
 		text_out 		: out std_logic_vector(127 downto 0) -- TODO: Define max size of output message
-	);
+	) := 
 end entity AES;
 
 architecture AES_arch of AES is

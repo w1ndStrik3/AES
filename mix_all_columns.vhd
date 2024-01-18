@@ -8,8 +8,8 @@ use IEEE.NUMERIC_STD.ALL;
 entity Mix_All_columns is
      Port(
 	  clk : in std_logic;
-	  input_byte: in STD_LOGIC_Vector(127 downto 0);
-			 output_byte : out STD_LOGIC_Vector(127 downto 0)
+	  input_mac: in STD_LOGIC_Vector(127 downto 0);
+			 output_mac : out STD_LOGIC_Vector(127 downto 0)
           );
 		
 end entity Mix_All_columns;
@@ -27,26 +27,26 @@ begin
 
 First_column_mix : Mix_column -- 4 bytes are send to mix_column gets transformed and send it to output
 		port map(
-					input_byte => input_byte(127 downto 96),
-					output_byte => output_byte(127 downto 96),
+					input_byte => input_mac(127 downto 96),
+					output_byte => output_mac(127 downto 96),
 				        clk => clk);
 
 Second_column_mix : Mix_column -- 4 bytes are send to mix_column gets transformed and send it to output
 		port map(
-					input_byte => input_byte(95 downto 64),
-					output_byte => output_byte(95 downto 64),
+					input_byte => input_mac(95 downto 64),
+					output_byte => output_mac(95 downto 64),
 					clk => clk);	
 					
 Third_column_mix : Mix_column -- 4 bytes are send to mix_column gets transformed and send it to output
 		port map(
-					input_byte => input_byte(63 downto 32),
-					output_byte => output_byte(63 downto 32),
+					input_byte => input_mac(63 downto 32),
+					output_byte => output_mac(63 downto 32),
 					clk => clk);
 	
 Last_column_mix : Mix_column -- 4 bytes are send to mix_column gets transformed and send it to output
 		port map(
-					input_byte => input_byte(31 downto 0),
-					output_byte => output_byte(31 downto 0),
+					input_byte => input_mac(31 downto 0),
+					output_byte => output_mac(31 downto 0),
 					clk => clk);	
 
 end Behavioral;
