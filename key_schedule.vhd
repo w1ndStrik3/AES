@@ -11,8 +11,8 @@ entity key_schedule is
     port (
 		clk : in std_logic;
 		rst_ks : in std_logic; -- Start key schedule
-		round_idx : in integer;
 		key : in std_logic_vector(127 downto 0); -- Cipher key
+		round_idx : out integer;
 		rkey : out round_key_t;
 		done_ks : out std_logic -- Finish key schedule
     );
@@ -25,9 +25,10 @@ architecture behavioral of key_schedule is
 	signal output_sb_s : std_logic_vector(31 downto 0); -- S-box output
 	signal rst_rkg_s : std_logic := '0'; -- Reset round key generation
 	signal input_rkg_s : std_logic_vector(127 downto 0);
-	signal output_rkg_s : std_logic_vector(127 downto 0); -- Round key generated
+	signal output_rkg_s : std_logic_vector(127 downto 0):= (others => 'Z'); -- Round key generated
 	signal done_rkg_s : std_logic := 'Z'; -- Finish round key generation
 	signal current_word_s : integer := 3; -- Current word being generated
+	signal round_idx_s : integer := 1;
 	
 	-- One word
 	type word_t is array(0 to 3) of std_logic_vector(31 downto 0);
@@ -58,7 +59,7 @@ begin
 	(
 		clk => clk,
 		rst_rkg => rst_rkg_s,
-		round_idx => round_idx,
+		round_idx => round_idx_s,
 		input_rkg => input_rkg_s,
 		output_rkg => output_rkg_s,
 		done_rkg => done_rkg_s
@@ -76,22 +77,39 @@ begin
 				w_s(3) <= key(31 downto 0); -- Column 4 
 				
 				-- First round key
-				rkey_s(0) 	<= 	key(127 downto 96) 	& 
+				rkey(0) 	<= 	key(127 downto 96) 	& 
 								key(95 downto 64)	&
 								key(63 downto 32)	&
 								key(31 downto 0);
 				
-				step_count_s <= 1;
+				round_idx <= 0;
+				
+				input_rkg_s <= key(127 downto 0);
+				
+				--step_count_s <= 1;
 				rst_rkg_s <= '1';
+				done_ks <= '0';
 				
 			elsif done_rkg_s = '1' then
 			-- Generate subsequent keys, eg. [w(4), w(5), w(6), w(7)]
-				rkey_s(round_idx) <= output_rkg_s; 
+				rkey(round_idx_s) <= output_rkg_s; 
+				-- input_rkg_s <= output_rkg_s;
+				-- round_idx_s <= round_idx_s + 1;
+				round_idx <= round_idx_s;
 				
-				--rst_rkg_s <= '1';
-				step_count_s <= step_count_s + 1;
-				current_word_s <= current_word_s + 4;
-			
+				if current_word_s < 39 then
+					rst_rkg_s <= '1';
+					--step_count_s <= step_count_s + 1;
+					current_word_s <= current_word_s + 4;
+					
+					input_rkg_s <= output_rkg_s;
+					round_idx_s <= round_idx_s + 1;
+					
+				else
+				
+					done_ks <= '1';
+					
+				end if;
 			else
 				
 				rst_rkg_s <= '0';
@@ -99,10 +117,14 @@ begin
 			end if;
 			
 			-- Finish key generation
-			if current_word_s = (4*10-1) then
-				done_ks <= '1';				
+			if current_word_s = 39 then
+							
 			end if;
+			
+			--rkey <= rkey_s;
+			
 		end if;
+		
 	end process generate_keys;
 	
 end architecture;

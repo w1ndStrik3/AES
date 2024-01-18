@@ -10,8 +10,8 @@ entity rkey_gen is
 	port ( 
 		clk : in std_logic;
 		rst_rkg : in std_logic; -- Reset round key generation
-		round_idx : in integer; -- Current round being handled
 	    input_rkg : in std_logic_vector(127 downto 0);
+		round_idx : in integer; -- Current round being handled
 		output_rkg : out std_logic_vector(127 downto 0);
 		done_rkg : out std_logic -- Finish round key generation
 	);
@@ -26,22 +26,23 @@ architecture behavioral of rkey_gen is
 	signal output_sb_s : std_logic_vector(127 downto 0);
 	
 	-- Array holds four words for each round key
-	type words_t is array(0 to 3) of std_logic_vector(31 downto 0);
-	signal w_s : words_t;
+	type word_t is array(0 to 3) of std_logic_vector(31 downto 0);
+	signal w_s : word_t;
 	
 	-- Round constants
 	type round_constant_t is array(1 to 10) of std_logic_vector(7 downto 0); 
-	constant rcon : round_constant_t := ( 				x"01", -- Round 1
-									     x"02", -- Round 2
-									     x"04", -- Round 3
-									     x"08", -- Round 4
-									     x"10", -- Round 5
-									     x"20", -- Round 6
-									     x"40", -- Round 7
-								         x"80", -- Round 8
-									     x"1b", -- Round 9
-									     x"36" ); -- Round 10
-																						
+	constant rcon : round_constant_t := (	
+											x"01", -- Round 1
+											x"02", -- Round 2
+											x"04", -- Round 3
+											x"08", -- Round 4
+											x"10", -- Round 5
+											x"20", -- Round 6
+											x"40", -- Round 7
+											x"80", -- Round 8
+											x"1b", -- Round 9
+											x"36" -- Round 10
+										); 
 	-- S-box
 	component sub_bytes is
 		port 
@@ -67,7 +68,8 @@ begin
 		if rising_edge(clk) then
 		
 			-- Reset to generate new round key (4 words)
-			if rst_rkg = '1' or done_rkg = '1' then
+			if rst_rkg = '1' then
+			
 				w_s <= -- Fill 4-word array 
 				(
 					input_rkg(127 downto 96), -- w(4) etc.
@@ -88,6 +90,7 @@ begin
 			
 			-- Runs S-box
 			elsif step_count_s = 1 then
+				
 				step_count_s <= 2;
 				done_rkg <= '0';
 				
@@ -104,7 +107,10 @@ begin
 				);
 				done_rkg <= '1';
 				
+				step_count_s <= 3;
+				
 			else
+			
 				done_rkg <= '0';
 				
 			end if;

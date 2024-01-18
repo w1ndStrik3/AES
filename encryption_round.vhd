@@ -115,7 +115,7 @@ architecture behavioral of encryption_round is
 
 							if step_count_s = 3 then
 
-								if round_idx_s = 10 then
+								if round_idx_s = rounds then
 
 									output_enc <= rkey_enc(round_idx_s) xor state_mc_s;
 									done_enc <= '1';
