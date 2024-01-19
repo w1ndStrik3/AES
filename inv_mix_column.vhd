@@ -18,10 +18,10 @@ end entity inv_mix_column;
 architecture Behavioral of inv_mix_column is
 
 
-component inverse_mult is -- Declare the componet that is used by this module
+component inv_mult is -- Declare the componet that is used by this module
 	Port(
 	     clk : in std_logic;
-	     input: in STD_LOGIC_Vector(7 downto 0);
+	     input_im: in STD_LOGIC_Vector(7 downto 0);
 	     output_9 : out STD_LOGIC_Vector(7 downto 0);
 	     output_11 : out STD_LOGIC_Vector(7 downto 0);
 	     output_13 : out STD_LOGIC_Vector(7 downto 0);
@@ -54,36 +54,36 @@ signal byte3x14 : STD_LOGIC_Vector(7 downto 0);
 
 begin
 
-byte0_mult : inverse_mult --first byte gets multiplied
+byte0_mult : inv_mult --first byte gets multiplied
 		port map(
-			 input => input_inv_mc(31 downto 24),
+			 input_im => input_inv_mc(31 downto 24),
 			 output_9 => byte0x9(7 downto 0),
                          output_11 => byte0x11(7 downto 0),
                          output_13 => byte0x13(7 downto 0),
                          output_14 => byte0x14(7 downto 0),
 			 clk => clk);	
 
-byte1_mult : inverse_mult --second byte gets multiplied
+byte1_mult : inv_mult --second byte gets multiplied
 		port map(
-			 input => input_inv_mc(23 downto 16),
+			 input_im => input_inv_mc(23 downto 16),
 			 output_9 => byte1x9(7 downto 0),
                          output_11 => byte1x11(7 downto 0),
                          output_13 => byte1x13(7 downto 0),
                          output_14 => byte1x14(7 downto 0),
 			 clk => clk);
 
-byte2_mult : inverse_mult --third byte gets multiplied
+byte2_mult : inv_mult --third byte gets multiplied
 		port map(
-			 input => input_inv_mc(15 downto 8),
+			 input_im => input_inv_mc(15 downto 8),
 			 output_9 => byte2x9(7 downto 0),
                          output_11 => byte2x11(7 downto 0),
                          output_13 => byte2x13(7 downto 0),
                          output_14 => byte2x14(7 downto 0),
 			 clk => clk);
 
-byte3_mult : inverse_mult --fourth byte gets multiplied
+byte3_mult : inv_mult --fourth byte gets multiplied
 		port map(
-			 input => input_inv_mc(7 downto 0),
+			 input_im => input_inv_mc(7 downto 0),
 			 output_9 => byte3x9(7 downto 0),
                          output_11 => byte3x11(7 downto 0),
                          output_13 => byte3x13(7 downto 0),

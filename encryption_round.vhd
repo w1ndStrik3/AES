@@ -1,6 +1,8 @@
--- This program handles an encryption round.
+-- This program handles the encryption
 
--- Completion time:
+-- Completion time: 40 CC
+-- (cipher text will be written to output_enc on CC 40,
+-- if the CC where start_enc = '1' is considered as CC 1)
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -94,7 +96,10 @@ architecture behavioral of encryption_round is
 					if start_enc = '1' and fin_enc_s /= '1' then
 						
 						if round_idx_s = 0 then
-
+							--CC 0: internal:
+							--		reads from input_enc
+							-- 		performs add round key
+							--		writes to state_io_s
 							state_io_s <= rkey_enc(round_idx_s) xor input_enc;
 							
 							done_enc_s <= '1';

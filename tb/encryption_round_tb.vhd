@@ -11,7 +11,6 @@ end encryption_round_tb;
 architecture encryption_round_tb_arch of encryption_round_tb is 
 
 	-- Component Declaration for the Unit Under Test (UUT)
-
 	component encryption_round is
 		port
 		(
@@ -24,6 +23,21 @@ architecture encryption_round_tb_arch of encryption_round_tb is
 			output_enc : out std_logic_vector(127 downto 0);
 			done_enc : out std_logic; -- Encryption round completed
 			fin_enc : out std_logic -- Entire encryption completed, i.e. the ciphertext is ready
+		);
+	end component;
+	
+	component decryption_round is
+		port
+		(
+			clk : in std_logic;
+			start_dec : in std_logic; -- Start decryption round when last four words have been generated
+			rkey_dec : in round_key_t;
+			input_dec : in std_logic_vector(127 downto 0); -- state
+			
+			output_dec : out std_logic_vector(127 downto 0);
+			round_idx : out integer;
+			done_dec : out std_logic; -- Decryption round completed
+			fin_dec : out std_logic -- Entire decryption completed, i.e. the plaintext is ready
 		);
 	end component;
 	
@@ -57,10 +71,11 @@ architecture encryption_round_tb_arch of encryption_round_tb is
 		end to_hex_string;
 	
 	--Write
-		signal clk_s_tb 			: std_logic := '1';
-		signal message_s_tb			: std_logic_vector(127 downto 0) := (others => '0'); --message to be encrypted
-		signal msg_rc_s_tb			: std_logic := '0';
-		signal rkey_enc_s_tb 		: round_key_t :=(
+		-- Global
+			signal clk_s_tb 			: std_logic := '1';
+			signal message_s_tb			: std_logic_vector(127 downto 0) := (others => '0'); --message to be encrypted
+			signal msg_rc_s_tb			: std_logic := '0';
+			signal rkey_glob_s_tb 		: round_key_t :=(
 														x"2B7E151628AED2A6ABF7158809CF4F3C",
 														x"A0FAFE1788542CB123A339392A6C7605",
 														x"F2C295F27A96B9435935807A7359F67F",
@@ -75,31 +90,55 @@ architecture encryption_round_tb_arch of encryption_round_tb is
 													);--(others => (others => '0'));
 		
 	--Read
-		signal ciph_txt_s_tb		: std_logic_vector(127 downto 0) := (others => 'Z'); -- ciphertext output
-		signal round_idx_s_tb		: integer := 0;
-		signal done_enc_s_tb		: std_logic := 'Z';
-		signal fin_enc_s_tb			: std_logic := 'Z';
+		-- Encryption
+			signal c_txt_s_tb			: std_logic_vector(127 downto 0) := (others => 'Z'); -- ciphertext output
+			signal round_idx_enc_s_tb	: integer := 0;
 			
+			signal done_enc_s_tb		: std_logic := 'Z';
+			signal fin_enc_s_tb			: std_logic := 'Z';
+			
+		-- Decryption
+			signal p_txt_s_tb			: std_logic_vector(127 downto 0) := (others => 'Z'); -- plaintext output
+			signal round_idx_dec_s_tb	: integer := 0;
+			
+			
+			signal done_dec_s_tb		: std_logic := 'Z';
+			signal fin_dec_s_tb			: std_logic := 'Z';
+			--signal test_in_dec			: std_logic_vector(127 downto 0) := x"3925841D02DC09FBDC118597196A0B32";
 	begin
 
 	clk_s_tb <= not clk_s_tb after (clk_period_s_tb / 2);
 
 	-- Instantiate the Unit Under Test (UUT)
-	uut : encryption_round
+	uut_enc : encryption_round
 		port map(
 			-- Inputs
 			clk			=> clk_s_tb,
 			start_enc	=> msg_rc_s_tb,
-			rkey_enc	=> rkey_enc_s_tb,
+			rkey_enc	=> rkey_glob_s_tb,
 			input_enc	=> message_s_tb,
 
 			-- Outputs
-			output_enc	=>	ciph_txt_s_tb,
-			round_idx	=>	round_idx_s_tb,
+			output_enc	=>	c_txt_s_tb,
+			round_idx	=>	round_idx_enc_s_tb,
 			done_enc 	=>	done_enc_s_tb,
 			fin_enc		=>  fin_enc_s_tb
 		);
+		
+	uut_dec : decryption_round
+		port map(
+			-- Inputs
+			clk			=> clk_s_tb,
+			start_dec	=> fin_enc_s_tb,
+			rkey_dec	=> rkey_glob_s_tb,
+			input_dec	=> c_txt_s_tb,
 
+			-- Outputs
+			output_dec	=>	p_txt_s_tb,
+			round_idx	=>	round_idx_dec_s_tb,
+			done_dec 	=>	done_dec_s_tb,
+			fin_dec		=>  fin_dec_s_tb
+		);
 -- Stimulus process
 	stim_proc : process
 	begin
@@ -119,10 +158,22 @@ architecture encryption_round_tb_arch of encryption_round_tb is
 			
 			if fin_enc_s_tb = '1' then
 				
-				report "ciphertext: " & to_hex_string(ciph_txt_s_tb);
+				report "ciphertext: " & to_hex_string(c_txt_s_tb);
 				
 			end if;
 			
+			while fin_dec_s_tb /= '1' loop
+			
+				wait for clk_period_s_tb;
+				
+			end loop;
+			
+			if fin_enc_s_tb = '1' then
+				
+				report "init plaintext: " & to_hex_string(message_s_tb);
+				report "decr plaintext: " & to_hex_string(p_txt_s_tb);
+				
+			end if;
 	wait;
 	end process;
 
