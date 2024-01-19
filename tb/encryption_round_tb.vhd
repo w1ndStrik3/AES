@@ -101,7 +101,6 @@ architecture encryption_round_tb_arch of encryption_round_tb is
 			signal p_txt_s_tb			: std_logic_vector(127 downto 0) := (others => 'Z'); -- plaintext output
 			signal round_idx_dec_s_tb	: integer := 0;
 			
-			
 			signal done_dec_s_tb		: std_logic := 'Z';
 			signal fin_dec_s_tb			: std_logic := 'Z';
 			--signal test_in_dec			: std_logic_vector(127 downto 0) := x"3925841D02DC09FBDC118597196A0B32";
